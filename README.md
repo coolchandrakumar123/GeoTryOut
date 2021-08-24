@@ -1,2 +1,1 @@
-# GeoTryOut
-Geo
+# ComposeTryOut
