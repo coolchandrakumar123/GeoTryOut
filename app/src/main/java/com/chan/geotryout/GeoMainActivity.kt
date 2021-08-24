@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,8 +24,8 @@ class GeoMainActivity : AppCompatActivity() {
         setContent {
             Column(modifier = Modifier.fillMaxWidth()) {
                 SingleText("Geo Coordinates")
-                displayGeoLocation("Latitude", "1.2222.333")
-                displayGeoLocation("Langtitude")
+                displayGeoLocation("Latitude   :", "1.2222.333")
+                displayGeoLocation("Langtitude :")
             }
         }
     }
@@ -45,8 +44,6 @@ class GeoMainActivity : AppCompatActivity() {
             text = valueText,
             style = TextStyle(fontSize = 20.sp),
             modifier = Modifier
-                .testTag("singleText")
-                .fillMaxWidth()
                 .padding(16.dp)
         )
     }

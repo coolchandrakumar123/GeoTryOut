@@ -7,22 +7,29 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/helloWorldEditText"
+    <Button
+        android:id="@+id/lastKnownLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        tools:text="EditTextFirstLine"/>
-
-    <TextView
-        android:id="@+id/helloWorldTextView"
+        android:layout_marginStart="24dp"
+        android:text="Last Known"
+        tools:text="TextViewSecondLine"/>
+    <Button
+        android:id="@+id/currentLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:layout_marginStart="24dp"
+        android:text="Current Known"
         tools:text="TextViewSecondLine"/>
 
-    <FrameLayout
-        android:id="@+id/compose_wrapper"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/locationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="12dp"
+        tools:text="TextViewSecondLine"/>
+
 </LinearLayout>
