@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-    //private lateinit var activityRecognitionClient: ActivityRecognitionClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +37,9 @@ class MainActivity : AppCompatActivity() {
         backgroundLocation.setOnClickListener {
             showBackgroundLocation()
         }
+        stopUpdates.setOnClickListener {
+            stopLocationUpdates()
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationCallback = object : LocationCallback() {
@@ -51,7 +53,6 @@ class MainActivity : AppCompatActivity() {
                 locationLabel.text = data
             }
         }
-        //activityRecognitionClient = ActivityRecognitionClient(this);
     }
 
     @SuppressLint("MissingPermission")
@@ -119,34 +120,14 @@ class MainActivity : AppCompatActivity() {
                 getPendingIntent()
             )
         }
-        /*activityRecognitionClient.requestActivityUpdates(
-            Utils.UPDATE_INTERVAL,
-            getPendingIntent()
-        )
-            .addOnSuccessListener(OnSuccessListener<Void?> { })
-            .addOnFailureListener(OnFailureListener { e ->
-                Log.i(
-                    "ChanLog",
-                    "addOnFailureListener mActivityRecognitionClient $e"
-                )
-            })*/
     }
 
     @SuppressLint("MissingPermission")
     private fun stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
         fusedLocationClient.removeLocationUpdates(getPendingIntent())
         Utils.removeNotification(applicationContext)
         toast("Location Updates Stopped!")
-        /*activityRecognitionClient.removeActivityUpdates(
-            getPendingIntent()
-        )
-            .addOnSuccessListener(OnSuccessListener<Void?> { })
-            .addOnFailureListener(OnFailureListener { e ->
-                Log.i(
-                    "ChanLog",
-                    "removeActivityUpdates addOnFailureListener $e"
-                )
-            })*/
     }
 
     override fun onStart() {
