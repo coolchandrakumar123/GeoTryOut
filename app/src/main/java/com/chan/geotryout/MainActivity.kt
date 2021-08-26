@@ -1,32 +1,18 @@
 package com.chan.geotryout
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.content.IntentSender.SendIntentException
-import android.content.pm.PackageManager
 import android.location.Location
-import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
-import android.provider.Settings
 import android.util.Log
-import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.requestPermissions
 import com.chan.geotryout.provider.LocationUpdatesBroadcastReceiver
 import com.chan.geotryout.util.*
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.gms.tasks.Task
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -34,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-    private lateinit var activityRecognitionClient: ActivityRecognitionClient
+    //private lateinit var activityRecognitionClient: ActivityRecognitionClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +33,10 @@ class MainActivity : AppCompatActivity() {
             showLastKnownLocation()
         }
         currentLocation.setOnClickListener {
-            setLocationRequest()
+            showCurrentLocation()
+        }
+        backgroundLocation.setOnClickListener {
+            showBackgroundLocation()
         }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -62,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                 locationLabel.text = data
             }
         }
-        activityRecognitionClient = ActivityRecognitionClient(this);
+        //activityRecognitionClient = ActivityRecognitionClient(this);
     }
 
     @SuppressLint("MissingPermission")
@@ -85,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setLocationRequest() {
+    private fun setLocationRequest(onSuccess: (LocationRequest) -> Unit) {
         val locationRequest = LocationRequest.create().apply {
             interval = 10000
             fastestInterval = 5000
@@ -100,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                 .addOnSuccessListener { locationSettingsResponse ->
                     //locationSettingsResponse.locationSettingsStates.
                     //fusedLocationClient.requestLocationUpdates()
-                    startLocationUpdates(locationRequest)
+                    onSuccess(locationRequest)
                 }
                 .addOnFailureListener { e ->
                     Log.d("ChanLog", "showLastKnownLocation:  Failed ${e.stackTraceToString()}")
@@ -112,12 +101,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun startLocationUpdates(locationRequest: LocationRequest) {
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
-        )
+    private fun showCurrentLocation() {
+        setLocationRequest { locationRequest ->
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun showBackgroundLocation() {
+        setLocationRequest { locationRequest ->
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                getPendingIntent()
+            )
+        }
         /*activityRecognitionClient.requestActivityUpdates(
             Utils.UPDATE_INTERVAL,
             getPendingIntent()
@@ -159,7 +160,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        stopLocationUpdates()
+        //stopLocationUpdates()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -183,7 +184,6 @@ class MainActivity : AppCompatActivity() {
         intent.action = LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES
         return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
-
     //endregion
 
 }

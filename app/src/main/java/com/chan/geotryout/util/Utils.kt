@@ -14,11 +14,22 @@ import android.preference.PreferenceManager
 import android.util.Log
 import com.chan.geotryout.MainActivity
 import com.chan.geotryout.R
+import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationResult
 import java.io.IOException
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import android.app.NotificationChannel
+import android.graphics.Color
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
+
+import androidx.core.content.ContextCompat.getSystemService
+
+
+
 
 
 /**
@@ -100,6 +111,47 @@ object Utils {
         }
         LocationRequestHelper.getInstance(context!!)?.setValue("addressFragments", addressFragments)
         return addressFragments
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun showNotificationOngoing(context: Context, content: String) {
+
+        val notificationManager =
+            context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = notificationManager.getNotificationChannel(channelId)
+        if(channel == null) {
+            createNotificationChannel(context)
+        }
+
+        val contentIntent = PendingIntent.getActivity(
+            context, 0,
+            Intent(context, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val notificationBuilder: Notification.Builder = Notification.Builder(context, channelId)
+            .setContentTitle(
+                "LocationInfoFromNotification"
+            )
+            .setContentText(content)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(contentIntent)
+            .setOngoing(true)
+            .setStyle(Notification.BigTextStyle().bigText(content))
+            .setAutoCancel(true)
+        notificationManager.notify(3, notificationBuilder.build())
+    }
+    val channelId = "chanGeoNotification2"
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel(context: Context) {
+        val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager?
+        val channelName: CharSequence = "GeoLocation"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val notificationChannel = NotificationChannel(channelId, channelName, importance)
+        notificationChannel.enableLights(true)
+        notificationChannel.lightColor = Color.RED
+        notificationChannel.enableVibration(false)
+        notificationManager?.createNotificationChannel(notificationChannel)
     }
 
     fun showNotificationOngoing(context: Context, broadcastevent: String?, title: String) {
