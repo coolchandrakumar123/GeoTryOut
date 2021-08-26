@@ -136,11 +136,12 @@ object Utils {
             .setContentText(content)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(contentIntent)
-            .setOngoing(true)
             .setStyle(Notification.BigTextStyle().bigText(content))
             .setAutoCancel(true)
+        //.setOngoing(true)
         notificationManager.notify(3, notificationBuilder.build())
     }
+
     val channelId = "chanGeoNotification2"
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(context: Context) {
