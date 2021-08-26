@@ -3,6 +3,7 @@ package com.chan.geotryout
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -11,6 +12,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.chan.geotryout.provider.LocationUpdatesBroadcastReceiver
 import com.chan.geotryout.util.*
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import kotlinx.android.synthetic.main.activity_main.*
@@ -20,13 +27,16 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    private var mMap: GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setLocationServicesClient()
+        setGoogleMap()
     }
 
+    //region Location related
     private fun setLocationServicesClient() {
         lastKnownLocation.setOnClickListener {
             showLastKnownLocation()
@@ -64,6 +74,7 @@ class MainActivity : AppCompatActivity() {
                     location?.let {
                         locationLabel.text =
                             "Last Known\n\nLatitude : ${location.latitude}, Longitude: ${location.longitude}"
+                        addMarkerToMap(location)
                     }
                 }
                 .addOnFailureListener { e ->
@@ -158,13 +169,50 @@ class MainActivity : AppCompatActivity() {
         onRequestPermissionsResult(requestCode, grantResults)
     }
 
-    //region Check And Remove Code
     private fun getPendingIntent(): PendingIntent? {
         val intent = Intent(this, LocationUpdatesBroadcastReceiver::class.java)
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
         intent.action = LocationUpdatesBroadcastReceiver.ACTION_PROCESS_UPDATES
         return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
+    //endregion
+
+    //region Map related
+    private fun setGoogleMap() {
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(mapReadyCallback)
+    }
+
+    private val mapReadyCallback = object: OnMapReadyCallback {
+        override fun onMapReady(googleMap: GoogleMap) {
+            mMap = googleMap
+
+            // Add a marker in Sydney and move the camera
+            addMarkerToMap(-34.0, 151.0, "Marker in Sydney")
+        }
+    }
+
+    private fun addMarkerToMap(location: Location) {
+        addMarkerToMap(location.latitude, location.longitude, getLocationAddress(location = location))
+    }
+
+    private val ZOOM_LEVEL = 13f
+    private fun addMarkerToMap(latitude: Double, longitude: Double, title: String = "Location") {
+        mMap?.clear()
+        val latLng = LatLng(latitude, longitude)
+        mMap?.addMarker(
+            MarkerOptions()
+                .position(latLng)
+                .title(title)
+        )
+        //mMap?.moveCamera(CameraUpdateFactory.newLatLng(latLng))
+        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, ZOOM_LEVEL))
+    }
+
+    private fun getLocationAddress(location: Location) = run { Geocoder(this).getFromLocation(location.latitude, location.longitude, 1)?.toString()?:"Location" }
+
     //endregion
 
 }
